@@ -281,21 +281,89 @@ function createSteps(totalSteps){
 
 createSteps(50);
 
+function createPlatform() {
 
-// Directional lighting
-const directional = new THREE.DirectionalLight(
-    0xffffff,
-    2
-);
+    const platform = new THREE.Group();
+    const base = createCylinder(0, 0, 0, 6, 6, 1);
 
-directional.position.set(10, 20, 10);
-directional.castShadow = true;
+    platform.add(base);
 
-scene.add(directional);
+    return platform;
+
+}
+
+//scene.add(createPlatform());
+
+function makeFenceXAxis(startX, y, startZ, radius, height, totalBars) {
+    const fence = new THREE.Group();
+    const fenceBarArray = [];
+
+    let x = startX;
+    let z = startZ;
+
+    for (let i = 0; i < totalBars-1; i++) {
+        const bar = createCylinder(x, y, z, radius, radius, height);
+
+        fence.add(bar);
+        fenceBarArray.push(bar);
+
+        const horizontalHeight = height;
+
+        const horizontalBar1 = createCylinder(x + horizontalHeight/2, y + 1, z, radius/2, radius/2, horizontalHeight).rotateZ(1);
+        const horizontalBar2 = createCylinder(x + horizontalHeight/2, y - 1, z, radius/2, radius/2, horizontalHeight).rotateZ(1);
+
+        fence.add(horizontalBar1);
+        fence.add(horizontalBar2);
+
+        x += horizontalHeight;
+    }
+
+    const bar = createCylinder(x, y, z, radius, radius, height);
+
+    fence.add(bar);
+    fenceBarArray.push(bar);
+
+    return fence;
+
+}
+
+scene.add(makeFenceXAxis(0, 2, 3, 0.2, 4, 7));
 
 
+function makeFenceZAxis(startX, y, startZ, radius, height, totalBars) {
+    const fence = new THREE.Group();
+    const fenceBarArray = [];
 
+    let x = startX;
+    let z = startZ;
 
+    for (let i = 0; i < totalBars-1; i++) {
+        const bar = createCylinder(x, y, z, radius, radius, height);
+
+        fence.add(bar);
+        fenceBarArray.push(bar);
+
+        const horizontalHeight = height;
+
+        const horizontalBar1 = createCylinder(x, y + 1, z + horizontalHeight/2, radius/2, radius/2, horizontalHeight).rotateX(1);
+        const horizontalBar2 = createCylinder(x, y - 1, z + horizontalHeight/2, radius/2, radius/2, horizontalHeight).rotateX(1);
+
+        fence.add(horizontalBar1);
+        fence.add(horizontalBar2);
+
+        z += horizontalHeight;
+    }
+
+    const bar = createCylinder(x, y, z, radius, radius, height);
+
+    fence.add(bar);
+    fenceBarArray.push(bar);
+
+    return fence;
+
+}
+
+scene.add(makeFenceZAxis(0, 2, 3, 0.2, 4, 7));
 
 
 // scene.add(createPlatform(12, 0.5, 0, 4, 0.5, 4, 0x263b59));
