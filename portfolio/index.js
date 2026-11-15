@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from "jsm/controls/OrbitControls.js";
+import { RoundedBoxGeometry } from "jsm/geometries/RoundedBoxGeometry.js";
 
 // 1. MAIN SCENE AND CAMERA
 const scene = new THREE.Scene();
@@ -44,6 +45,19 @@ function createBox(x, y, z, width, height, depth, color) {
     box.receiveShadow = true;
 
     return box;
+}
+
+function createRoundedBox(x, y, z, width, height, depth, color) {
+    const geometry = new RoundedBoxGeometry(width, height, depth);
+    const material = new THREE.MeshStandardMaterial( { color: color } );
+    const cube = new THREE.Mesh( geometry, material );
+
+    cube.position.set(x, y, z);
+
+    cube.castShadow = true;
+    cube.receiveShadow = true;
+
+    return cube;
 }
 
 function createTower(x, z, height, width, color) {
@@ -182,18 +196,18 @@ function createSofa(posX, posY, posZ, seats, seatSize) {
     const sofa = new THREE.Group();
 
     if (seats === 1) {
-        const height = seatSize*0.7
-        const seat = createBox(0, height/2, 0, seatSize, height, seatSize/1.2);
+        const height = seatSize*0.7;
+        const seat = createRoundedBox(0, height/2, 0, seatSize, height, seatSize/1.2, 0x612E4F);
 
         sofa.add(seat);
 
-        const leftSide = createBox(seatSize/2, height*1.3/2, 0, seatSize/3, height*1.3, seatSize);
-        const rightSide = createBox(-seatSize/2, height*1.3/2, 0, seatSize/3, height*1.3, seatSize);
+        const leftSide = createRoundedBox(seatSize/2, height*1.3/2, 0, seatSize/3, height*1.3, seatSize, 0x572946);
+        const rightSide = createRoundedBox(-seatSize/2, height*1.3/2, 0, seatSize/3, height*1.3, seatSize, 0x572946);
 
         sofa.add(leftSide);
         sofa.add(rightSide);
 
-        const back = createBox(0, height, -seatSize/2, seatSize, height*2, seatSize/3);
+        const back = createRoundedBox(0, height, -seatSize/2, seatSize, height*2, seatSize/3, 0x572946);
         
         sofa.add(back);
     }
@@ -203,13 +217,13 @@ function createSofa(posX, posY, posZ, seats, seatSize) {
     return sofa;
 }
 
-scene.add(createSofa(0, 0, 0, 1, 2));
+//scene.add(createSofa(0, 0, 0, 1, 2));
 
 // 3. MAIN SCENE LIGHTING
 scene.add(new THREE.AmbientLight(0xffffff, 1.5));
 
 const mainLight = new THREE.DirectionalLight(0xffffff, 2);
-mainLight.position.set(3, 5, 5);
+mainLight.position.set(0, 20, 0);
 scene.add(mainLight);
 
 const groundGeometry = new THREE.BoxGeometry(
