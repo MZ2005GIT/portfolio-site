@@ -10,7 +10,7 @@ const camera = new THREE.PerspectiveCamera(
 60, window.innerWidth / window.innerHeight, 0.1, 100
 );
 camera.position.set(0, 2, 50);
-camera.lookAt(0, 1.5, -100);
+camera.lookAt(0, 2, 0);
 
 // 2. RENDERER
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -19,9 +19,9 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 document.body.appendChild(renderer.domElement);
 
-const controls  = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
-controls.dampingFactor = 0.003;
+// const controls  = new OrbitControls(camera, renderer.domElement);
+// controls.enableDamping = true;
+// controls.dampingFactor = 0.003;
 
 function createBox(x, y, z, width, height, depth, color) {
 
@@ -165,24 +165,24 @@ function createTrees(totalTrees) {
     let z = 50;
     
     for (let i = 0; i < totalTrees; i++) {
-        const errX = THREE.MathUtils.randFloat(-0.6, 0.6);
+        const errX = THREE.MathUtils.randFloat(-0.8, 0.8);
         const errZ = THREE.MathUtils.randFloat(-1, 1);
         // const x = THREE.MathUtils.randFloat(-20, 20);
         // const z = THREE.MathUtils.randFloat(-40, 40);
         if (i % 2 === 0) {
-            x = 3.5;
-            z -= 10;
+            x = 5.3;
+            z -= THREE.MathUtils.randFloat(8, 10);;
         } else {
-            x = -3.5;
+            x = -5.3;
         }
 
         x += errX;
         z += errZ;
 
-        const rTop = THREE.MathUtils.randFloat(0.4, 1);
-        const rBottom = THREE.MathUtils.randFloat(rTop*1.3, rTop*1.5);
+        const rTop = THREE.MathUtils.randFloat(0.5, 1.2);
+        const rBottom = THREE.MathUtils.randFloat(rTop*1.3, rTop*1.7);
 
-        const height = THREE.MathUtils.randFloat(6, 10);
+        const height = THREE.MathUtils.randFloat(9, 12);
 
         const spheres = THREE.MathUtils.randFloat(height, height*2);
 
@@ -194,30 +194,38 @@ createTrees(20);
 
 function createSofa(posX, posY, posZ, seats, seatSize) {
     const sofa = new THREE.Group();
+    const height = seatSize*0.7;
+    const totalWidth = seats * seatSize;
+    let x = -(totalWidth/2 - 0.5*seatSize);
 
-    if (seats === 1) {
-        const height = seatSize*0.7;
-        const seat = createRoundedBox(0, height/2, 0, seatSize, height, seatSize/1.2, 0x612E4F);
+    for (let i = 0; i < seats; i++) {
+        
+        const seat = createRoundedBox(x, height/2, 0, seatSize, height, seatSize/1.2, 0x612E4F);
 
         sofa.add(seat);
 
-        const leftSide = createRoundedBox(seatSize/2, height*1.3/2, 0, seatSize/3, height*1.3, seatSize, 0x572946);
-        const rightSide = createRoundedBox(-seatSize/2, height*1.3/2, 0, seatSize/3, height*1.3, seatSize, 0x572946);
-
-        sofa.add(leftSide);
-        sofa.add(rightSide);
-
-        const back = createRoundedBox(0, height, -seatSize/2, seatSize, height*2, seatSize/3, 0x572946);
+        const back = createRoundedBox(x, height, -seatSize/2, seatSize, height*2, seatSize/3, 0x572946);
         
         sofa.add(back);
+
+        x += seatSize;  
     }
+
+    sofa.position.set(0, 0, 0);
+
+    x = totalWidth/2;
+    const leftSide = createRoundedBox(x, height*1.3/2, 0, seatSize/3, height*1.3, seatSize, 0x572946);
+    const rightSide = createRoundedBox(-x, height*1.3/2, 0, seatSize/3, height*1.3, seatSize, 0x572946);
+
+    sofa.add(leftSide);
+    sofa.add(rightSide);
 
     sofa.position.set(posX, posY, posZ);
 
+    scene.add(sofa);
+
     return sofa;
 }
-
-//scene.add(createSofa(0, 0, 0, 1, 2));
 
 // 3. MAIN SCENE LIGHTING
 scene.add(new THREE.AmbientLight(0xffffff, 1.5));
@@ -227,7 +235,7 @@ mainLight.position.set(0, 20, 0);
 scene.add(mainLight);
 
 const groundGeometry = new THREE.BoxGeometry(
-    50, 0.5, 100
+    30, 0.5, 100
 );
 
 const groundMaterial = new THREE.MeshStandardMaterial({
@@ -253,15 +261,15 @@ function createSteps(totalSteps){
     let z = 45;
 
     for (let i = 0; i < totalSteps; i++) {
-        let x = 0.7;
-        let err = THREE.MathUtils.randFloat(-0.25, 0.25);
+        let x = 1;
+        let err = THREE.MathUtils.randFloat(-0.5, 0.5);
 
-        let width = 1.2, depth = 1.2;
+        let width = 2.4, depth = 2.4;
 
         if (i % 2 == 0) {
-            x = 0.7;
+            x = 1.4;
         } else {
-            x = -0.7;
+            x = -1.4;
         }
 
         x += err;
@@ -275,11 +283,13 @@ function createSteps(totalSteps){
 
         scene.add(step);
 
-        z -= 2.5;
+        z += err/2;
+
+        z -= 3.8;
     }
 }
 
-createSteps(50);
+createSteps(25);
 
 function createPlatform() {
 
@@ -291,8 +301,6 @@ function createPlatform() {
     return platform;
 
 }
-
-//scene.add(createPlatform());
 
 function makeFenceXAxis(startX, y, startZ, radius, height, totalBars) {
     const fence = new THREE.Group();
@@ -327,8 +335,8 @@ function makeFenceXAxis(startX, y, startZ, radius, height, totalBars) {
 
 }
 
-scene.add(makeFenceXAxis(-23, 2, 48, 0.2, 4, 14));
-scene.add(makeFenceXAxis(-23, 2, -48, 0.2, 4, 14));
+scene.add(makeFenceXAxis(-13, 2, 48, 0.2, 4, 8));
+scene.add(makeFenceXAxis(-13, 2, -48, 0.2, 4, 8));
 
 
 function makeFenceZAxis(startX, y, startZ, radius, height, totalBars) {
@@ -364,30 +372,11 @@ function makeFenceZAxis(startX, y, startZ, radius, height, totalBars) {
 
 }
 
-scene.add(makeFenceZAxis(24, 2, -48, 0.2, 4, 27));
-scene.add(makeFenceZAxis(-24, 2, -48, 0.2, 4, 27));
+scene.add(makeFenceZAxis(14, 2, -48, 0.2, 4, 27));
+scene.add(makeFenceZAxis(-14, 2, -48, 0.2, 4, 27));
 
 
-// scene.add(createPlatform(12, 0.5, 0, 4, 0.5, 4, 0x263b59));
-
-// scene.add(createPlatform(-7, 0.5, 5, 5, 0.5, 5, 0x263b59));
-
-// scene.add(createPlatform(0, 0.5, -6, 5, 0.5, 5, 0x263b59));
-
-// scene.add(createPlatform(8, 0.5, -3, 4, 0.5, 4, 0x263b59));
-
-// scene.add(createPlatform(-12, 0.5, 6, 3, 0.5, 3, 0x263b59));
-
-// scene.add(createPlatform(-5, 0.5, -7, 4, 0.5, 4, 0x263b59));
-
-// scene.add(createTower(-10, -10, 8, 2, 0x263b59));
-
-// scene.add(createTower(10, -10, 12, 2, 0x263b59));
-
-// scene.add(createTower(-10, 10, 8, 2, 0x263b59));
-
-// scene.add(createTower(10, 10, 12, 2, 0x263b59));
-
+{
 // 5. PORTAL FRAME
 // const frameMaterial = new THREE.MeshStandardMaterial({
 // color: 0x00ccff,
@@ -506,29 +495,190 @@ scene.add(makeFenceZAxis(-24, 2, -48, 0.2, 4, 27));
 // );
 // portalPlane.position.set(0, 1.8, 0.14);
 // scene.add(portalPlane);
-
-// 11. ANIMATION AND RENDER ORDER
-const clock = new THREE.Clock();
-
-function animate() {
-requestAnimationFrame(animate);
-
-const elapsed = clock.getElapsedTime();
-
-// portalMaterial.uniforms.uTime.value = elapsed;
-
-controls.update();
-
-// Render the portal scene to its texture first.
-// renderer.setRenderTarget(portalTexture);
-renderer.clear();
-// renderer.render(portalScene, portalCamera);
-
-// Then render the main scene to the browser.
-renderer.setRenderTarget(null);
-renderer.render(scene, camera);
 }
-animate();
+
+const posterBoards = [];
+
+function createPosterBoard(posX, posY, posZ, height, width) {
+    const posterBoard = new THREE.Group();
+    const thickness = 0.2;
+
+    const boardY = height*1.2;
+    const boardZ = 0;
+
+    const leftLeg = createBox(0, 0, 0, thickness, height, thickness, 0x5C3F3F);
+    const rightLeg = createBox(0, 0, 0, thickness, height, thickness, 0x5C3F3F);
+
+    leftLeg.rotation.z = Math.PI/5;
+    rightLeg.rotation.z = -Math.PI/5;
+
+    leftLeg.position.x = height*0.5;
+    rightLeg.position.x = -height*0.5;
+
+    posterBoard.add(leftLeg);
+    posterBoard.add(rightLeg);
+
+    const board = createBox(0, boardY, boardZ, width, height*2, thickness/4);
+
+    const barThickness = thickness/2;
+
+    // const leftBar = createBox(width/2, 0, boardZ + dp, barThickness, height*2, barThickness);
+    // const rightBar = createBox(-width/2, 0, boardZ + dp, barThickness, height*2, barThickness);
+    const topBar = createBox(0, height, boardZ, width + barThickness, barThickness, barThickness, 0x5C3F3F);
+    const bottomBar = createBox(0, -(height), boardZ, width + barThickness, barThickness, barThickness, 0x5C3F3F);
+
+    //board.add(leftBar);
+    //board.add(rightBar);
+    board.add(topBar);
+    board.add(bottomBar);
+
+    board.rotation.x = -Math.PI/16;
+
+    posterBoard.add(board)
+
+    posterBoard.position.set(posX, posY, posZ);
+
+    posterBoards.push(posterBoard);
+
+    scene.add(posterBoard);
+
+    return posterBoard;
+}
+
+function createPosterBoards(number) {
+
+    let x = 4;
+    let z = 20;
+    let height = THREE.MathUtils.randFloat(1, 2);
+    let width = THREE.MathUtils.randFloat(height, 3);
+    let rot = Math.PI;
+    
+    for (let i = 0; i < number; i++) {
+        if (i % 2 === 0) {
+            x = -3.8;
+            rot = Math.PI/4;
+        } else {
+            x = 3.8;
+            rot = -Math.PI/4;
+        }
+
+        const board = createPosterBoard(x, 0.5, z, height, width);
+
+        board.rotation.y = rot;
+
+        z -= 18;
+    }
+}
+
+
+createPosterBoards(4);
+
+const keys = {};
+
+window.addEventListener(
+    "keydown",
+    function(event)
+    {
+        keys[event.key.toLowerCase()] = true;
+    }
+);
+
+window.addEventListener(
+    "keyup",
+    function(event)
+    {
+        keys[event.key.toLowerCase()] = false;
+    }
+);
+
+function moveCamera(deltaTime)
+{
+    const speed = 4.2;
+
+    if (keys["w"])
+    {
+        camera.position.z -= speed * deltaTime;
+    }
+
+    if (keys["s"])
+    {
+        camera.position.z += speed * deltaTime;
+    }
+
+    if (keys["a"])
+    {
+        camera.position.x -= speed * deltaTime;
+    }
+
+    if (keys["d"])
+    {
+        camera.position.x += speed * deltaTime;
+    }
+
+    camera.position.x = THREE.MathUtils.clamp(camera.position.x, -14, 14);
+
+    camera.position.z = THREE.MathUtils.clamp(camera.position.z, -45, 45);
+}
+
+let isMouseDown = false;
+
+let previousMouseX = 0;
+
+let rotationSpeed = 0.005;
+
+document.addEventListener('mousedown', (event) => {
+    if (event.button === 0) {
+        isMouseDown = true;
+
+        previousMouseX = event.clientX;
+    }
+});
+
+document.addEventListener('mousemove', (event) => {
+
+    if (!isMouseDown) return;
+
+    let deltaX = event.clientX - previousMouseX;
+
+    camera.rotation.y -= deltaX * rotationSpeed;
+
+    previousMouseX = event.clientX;
+
+});
+
+document.addEventListener('mouseup', () => {
+    isMouseDown = false;
+});
+
+let previousTime;
+
+function animate(currentTime) {
+    requestAnimationFrame(animate);
+
+    if (previousTime === undefined)
+    {
+        previousTime = currentTime;
+    }
+
+    const deltaTime = (currentTime - previousTime) / 1000;
+
+    previousTime = currentTime;
+
+    // portalMaterial.uniforms.uTime.value = elapsed;
+
+    //controls.update();
+    moveCamera(deltaTime);
+
+    // Render the portal scene to its texture first.
+    // renderer.setRenderTarget(portalTexture);
+    renderer.clear();
+    // renderer.render(portalScene, portalCamera);
+
+    // Then render the main scene to the browser.
+    renderer.setRenderTarget(null);
+    renderer.render(scene, camera);
+}
+animate(performance.now());
 
 // 12. RESIZE THE MAIN CAMERA AND RENDERER
 window.addEventListener('resize', () => {
