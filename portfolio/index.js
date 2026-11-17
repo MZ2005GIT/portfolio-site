@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from "jsm/controls/OrbitControls.js";
+import { GLTFLoader } from 'jsm/loaders/GLTFLoader.js';
 import { RoundedBoxGeometry } from "jsm/geometries/RoundedBoxGeometry.js";
 
 // 1. MAIN SCENE AND CAMERA
@@ -37,7 +38,12 @@ function createBox(x, y, z, width, height, depth, color) {
         roughness: 0.4
     });
 
-    const box = new THREE.Mesh(geometry, material);
+    const materials = [
+        material, material, material,
+        material, material, material
+    ];
+
+    const box = new THREE.Mesh(geometry, materials);
 
     box.position.set(x, y, z);
 
@@ -58,29 +64,6 @@ function createRoundedBox(x, y, z, width, height, depth, color) {
     cube.receiveShadow = true;
 
     return cube;
-}
-
-function createTower(x, z, height, width, color) {
-
-    const geometry = new THREE.BoxGeometry(
-        width,
-        height,
-        width
-    );
-
-    const material = new THREE.MeshStandardMaterial({
-        color: color,
-        metalness: 0.8,
-        roughness: 0.3
-    });
-
-    const tower = new THREE.Mesh(geometry, material);
-
-    tower.position.set(x, height / 2, z);
-
-    tower.castShadow = true;
-
-    return tower;
 }
 
 function createCylinder(posX, posY, posZ, rTop, rBottom, height, color) {
@@ -170,7 +153,7 @@ function createTrees(totalTrees) {
         // const x = THREE.MathUtils.randFloat(-20, 20);
         // const z = THREE.MathUtils.randFloat(-40, 40);
         if (i % 2 === 0) {
-            x = 5.3;
+            x = 5.5;
             z -= THREE.MathUtils.randFloat(8, 10);;
         } else {
             x = -5.3;
@@ -226,6 +209,7 @@ function createSofa(posX, posY, posZ, seats, seatSize) {
 
     return sofa;
 }
+
 
 // 3. MAIN SCENE LIGHTING
 scene.add(new THREE.AmbientLight(0xffffff, 1.5));
@@ -497,9 +481,61 @@ scene.add(makeFenceZAxis(-14, 2, -48, 0.2, 4, 27));
 // scene.add(portalPlane);
 }
 
+// Convert canvas to texture
+async function makePaper(heading, text) {
+
+    const paper = document.createElement('div');
+
+    paper.className = 'paper';
+
+    const title = document.createElement('h1');
+    title.textContent = heading;
+
+    const details = document.createElement('p');
+    details.textContent = text;
+
+    paper.appendChild(title);
+    paper.appendChild(details);
+
+    document.body.appendChild(paper);
+
+    // Capture the HTML element
+    const canvas = await html2canvas(paper);
+
+    // Convert to Three.js texture
+    const texture = new THREE.CanvasTexture(canvas);
+
+    // Remove temporary HTML element
+    paper.remove();
+
+    return texture;
+}
+
+const textures = [];
+
+async function makeTextures() {
+
+    const information = [
+        ['About Me', 'Mashal Zehra\n21\nAspiring Game Developer'],
+        ['Skills And Technologies', 'JavaScript\nThree.js\nC#\nUnity\nUnreal Engine'],
+        ['Education And Experience', 'University Student\n.NET intern at SIEHS\nBlueprints Developer intern at HAS'],
+        ['Contact Me', 'Email: zehramashal10@gmail.com']
+    ];
+
+    for (let i = 0; i < information.length; i++) {
+
+        const texture = await makePaper(
+            information[i][0],
+            information[i][1]
+        );
+
+        textures.push(texture);
+    }
+}
+
 const posterBoards = [];
 
-function createPosterBoard(posX, posY, posZ, height, width) {
+function createPosterBoard(posX, posY, posZ, height, width, texture) {
     const posterBoard = new THREE.Group();
     const thickness = 0.2;
 
@@ -519,6 +555,8 @@ function createPosterBoard(posX, posY, posZ, height, width) {
     posterBoard.add(rightLeg);
 
     const board = createBox(0, boardY, boardZ, width, height*2, thickness/4);
+    board.material[4] = new THREE.MeshStandardMaterial({
+    map: texture});
 
     const barThickness = thickness/2;
 
@@ -534,7 +572,7 @@ function createPosterBoard(posX, posY, posZ, height, width) {
 
     board.rotation.x = -Math.PI/16;
 
-    posterBoard.add(board)
+    posterBoard.add(board);    
 
     posterBoard.position.set(posX, posY, posZ);
 
@@ -542,27 +580,32 @@ function createPosterBoard(posX, posY, posZ, height, width) {
 
     scene.add(posterBoard);
 
+    posterBoard.userData.board= board;
+    posterBoard.userData.height = height*2;
+    posterBoard.userData.width = width;
+
     return posterBoard;
 }
 
 function createPosterBoards(number) {
 
-    let x = 4;
-    let z = 20;
-    let height = THREE.MathUtils.randFloat(1, 2);
-    let width = THREE.MathUtils.randFloat(height, 3);
+    let x = 3.8;
+    let z = 35;
+    
     let rot = Math.PI;
     
     for (let i = 0; i < number; i++) {
+        const height = THREE.MathUtils.randFloat(1.5, 2);
+        const width = THREE.MathUtils.randFloat(height, height + 1.5);
         if (i % 2 === 0) {
-            x = -3.8;
+            x = -3.5;
             rot = Math.PI/4;
         } else {
-            x = 3.8;
+            x = 3.5;
             rot = -Math.PI/4;
         }
 
-        const board = createPosterBoard(x, 0.5, z, height, width);
+        const board = createPosterBoard(x, 0.5, z, height, width, textures[i]);
 
         board.rotation.y = rot;
 
@@ -570,8 +613,14 @@ function createPosterBoards(number) {
     }
 }
 
+async function initializePosters() {
 
-createPosterBoards(4);
+    await makeTextures();
+
+    createPosterBoards(4);
+}
+
+initializePosters();
 
 const keys = {};
 
@@ -593,7 +642,7 @@ window.addEventListener(
 
 function moveCamera(deltaTime)
 {
-    const speed = 4.2;
+    const speed = 5;
 
     if (keys["w"])
     {

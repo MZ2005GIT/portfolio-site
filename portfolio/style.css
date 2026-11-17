@@ -1,0 +1,28 @@
+.paper {
+    position: absolute;
+    left: -10000px;
+    top: 0;
+
+    width: 512px;
+    height: 512px;
+    padding: 40px;
+    box-sizing: border-box;
+
+    background: #bbb6a5;
+    color: #301f1f;
+
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+
+.paper h1 {
+    font-size: 40px;
+    margin-bottom: 30px;
+}
+
+.paper p {
+    font-size: 28px;
+    font-weight: bold;
+    line-height: 1.5;
+    white-space: pre-line;
+}
