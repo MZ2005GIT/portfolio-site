@@ -300,13 +300,20 @@ function createDoor(posX, posY, posZ, width, height) {
     door.add(topFrame);
 
     // Handle
-    const handle = createSphere(
-        width * 0.3, height / 2, 0.15,
+    const handle1 = createSphere(
+        width * 0.3, height / 2, 0.3,
         0.1,
         0xD4AF37
     );
 
-    door.add(handle);
+    const handle2 = createSphere(
+        width * 0.3, height / 2, -0.3,
+        0.1,
+        0xD4AF37
+    );
+
+    door.add(handle1);
+    door.add(handle2);
 
     door.position.set(posX, posY, posZ);
 
@@ -496,62 +503,68 @@ function createRoom(posX, posY, posZ, width, depth, wallColor, floorColor, lampC
     room.add(rightWall);
 
     // FRONT WALL LEFT
-    // const frontLeft = createBox(
-    //     -(width / 2 - (width - doorWidth) / 4),
-    //     height / 2, depth / 2,
-    //     (width - doorWidth) / 2,
-    //     height, wallThickness,
-    //     wallColor
-    // );
-
-    // room.add(frontLeft);
-
-    // // FRONT WALL RIGHT
-    // const frontRight = createBox(
-    //     (width / 2 - (width - doorWidth) / 4),
-    //     height / 2, depth / 2,
-    //     (width - doorWidth) / 2,
-    //     height, wallThickness,
-    //     wallColor
-    // );
-
-    // room.add(frontRight);
-
-    // // FRONT WALL TOP
-    // const frontTop = createBox(
-    //     0, (height + doorHeight) / 2, depth / 2,
-    //     doorWidth, height - doorHeight,
-    //     wallThickness,
-    //     wallColor
-    // );
-
-    // room.add(frontTop);
-
-    const frontWall = createBox(
-        0, height / 2, depth / 2,
-        width, height, wallThickness,
+    const frontLeft = createBox(
+        -(width / 2 - (width - doorWidth) / 4),
+        height / 2, depth / 2,
+        (width - doorWidth) / 2,
+        height, wallThickness,
         wallColor
     );
 
-    room.add(frontWall);
+    room.add(frontLeft);
 
-    // SOFA
+    // FRONT WALL RIGHT
+    const frontRight = createBox(
+        (width / 2 - (width - doorWidth) / 4),
+        height / 2, depth / 2,
+        (width - doorWidth) / 2,
+        height, wallThickness,
+        wallColor
+    );
+
+    room.add(frontRight);
+
+    // FRONT WALL TOP
+    const frontTop = createBox(
+        0, (height + doorHeight) / 2, depth / 2,
+        doorWidth, height - doorHeight,
+        wallThickness,
+        wallColor
+    );
+
+    room.add(frontTop);
+
+    // const frontWall = createBox(
+    //     0, height / 2, depth / 2,
+    //     width, height, wallThickness,
+    //     wallColor
+    // );
+
+    // room.add(frontWall);
+
+    // SOFA - RIGHT WALL (+X)
     const sofa = createSofa(
-        0, 0.1, -depth / 2 + 2,
-        sofaSeats, sofaSize
+        width / 2 - 1.5,
+        0.1,
+        0,
+        sofaSeats,
+        sofaSize
     );
 
     room.add(sofa);
+    sofa.rotateY(-Math.PI / 2);
 
-
-    // TV
+    // TV - LEFT WALL (-X)
     const tv = createTV(
-        0, 0.1, depth / 2 - 1.5,
-        width * 0.3, 1.5
+        -width / 2 + 1.5,
+        0.1,
+        0,
+        width * 0.3,
+        1.5
     );
 
     room.add(tv);
-
+    tv.rotateY(Math.PI / 2);
 
     // COFFEE TABLE
     const table = createCoffeeTable(
@@ -561,22 +574,20 @@ function createRoom(posX, posY, posZ, width, depth, wallColor, floorColor, lampC
 
     room.add(table);
 
-    // DRESSER
+    // DRESSER - BACK WALL (-Z)
     const dresserWidth = THREE.MathUtils.randFloat(1.2, 1.8);
-    const dresserHeight = THREE.MathUtils.randFloat(1.3, 2);
+    const dresserHeight = THREE.MathUtils.randFloat(dresserDrawers * 0.3, dresserDrawers * 0.5);
 
     const dresser = createDresser(
-        width / 2 - 1,
-        0.1,
         0,
+        0.1,
+        -depth / 2 + 0.8,
         dresserWidth,
         dresserHeight,
         dresserDrawers
     );
 
     room.add(dresser);
-
-    dresser.rotateY(-Math.PI/2);
 
     // DOOR
     const door = createDoor(
@@ -598,7 +609,6 @@ function createRoom(posX, posY, posZ, width, depth, wallColor, floorColor, lampC
 
     room.add(lamp);
 
-    // POSITION ROOM
     room.position.set(posX, posY, posZ);
 
     scene.add(room);
