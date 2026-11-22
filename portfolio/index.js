@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from "jsm/controls/OrbitControls.js";
 import { GLTFLoader } from 'jsm/loaders/GLTFLoader.js';
 import { RoundedBoxGeometry } from "jsm/geometries/RoundedBoxGeometry.js";
+import { Timer } from 'jsm/misc/Timer.js';
 
 // 1. MAIN SCENE AND CAMERA
 const scene = new THREE.Scene();
@@ -443,7 +444,7 @@ function createLamp(posX, posY, posZ, height, lightColor) {
     // Actual light source
     const light = new THREE.PointLight(
         lightColor,
-        15,
+        10,
         height * 4
     );
 
@@ -699,6 +700,48 @@ function createTrees(totalTrees) {
 }
 
 createTrees(20);
+
+let mixer;
+const timer = new Timer();
+let model;
+// optional: ignores time spent while the tab is hidden
+
+new GLTFLoader().load(
+  'alien.glb',
+  (gltf) => {
+    model = gltf.scene;
+    scene.add(model);
+    
+    const size = new THREE.Box3().setFromObject(model).getSize(new THREE.Vector3());
+    console.log(size, model.position);
+    model.scale.set(0.8, 0.8, 0.8);
+    model.position.z = -52;
+    model.position.x = -3.7;
+    model.position.y = 0.1;
+
+    //model.position.z = 40;
+    //model.rotation.y = -Math.PI/2;
+
+    // Animations come as an array of AnimationClips
+    mixer = new THREE.AnimationMixer(model);
+    console.log(gltf.animations.map(a => a.name)); // see what's available
+
+    const clip = gltf.animations[1];
+    mixer.clipAction(clip).play();
+  },
+  (xhr) => console.log((xhr.loaded / xhr.total * 100).toFixed(0) + '% loaded'),
+  (err) => console.error('Load failed', err)
+);
+
+renderer.setAnimationLoop((timestamp) => {
+  timer.update(timestamp);
+  if (mixer) mixer.update(timer.getDelta());
+  if (model) {
+
+  } 
+  renderer.render(scene, camera);
+});
+
 
 // 3. MAIN SCENE LIGHTING
 scene.add(new THREE.AmbientLight(0xffffff, 1.5));
@@ -1132,7 +1175,7 @@ window.addEventListener(
 
 function moveCamera(deltaTime)
 {
-    const speed = 8;
+    const speed = 10;
 
     if (keys["w"])
     {

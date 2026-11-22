@@ -7,7 +7,7 @@
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0">
 
-    <title>Portal</title>
+    <title>Portfolio</title>
     <link rel="stylesheet" href="style.css">
 
     <script type="importmap">
@@ -20,11 +20,175 @@
         }
 
     </script>
+    <script
+    src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+    async
+    defer>
+</script>
 
 </head>
 
 
 <body>
+    <!-- Navigation -->
+<nav class="navigation">
+    <button id="homeBtn">Home</button>
+    <button id="contactBtn">Contact</button>
+</nav>
+
+
+<!-- Home Overlay -->
+<section id="homeOverlay" class="overlay hidden">
+
+    <button class="close-btn" id="closeHome">&times;</button>
+
+    <div class="overlay-content">
+        <h1>Your Name</h1>
+        <h3>Software Developer</h3>
+
+        <p>
+            Welcome to my portfolio!
+
+            I'm a software developer interested in
+            building interactive applications and games.
+        </p>
+
+    </div>
+
+</section>
+
+
+<!-- Contact Overlay -->
+<section id="contactOverlay" class="overlay hidden">
+
+    <button class="close-btn" id="closeContact">&times;</button>
+
+    <div class="overlay-content">
+
+        <h1>Contact Me</h1>
+
+        <form id="contactForm" novalidate>
+
+            <div class="honeypot" aria-hidden="true">
+    <label for="website">Leave this empty</label>
+    <input
+        type="text"
+        id="website"
+        name="website"
+        tabindex="-1"
+        autocomplete="off">
+</div>
+
+    <label for="name">Name</label>
+    <input
+        type="text"
+        id="name"
+        name="name"
+        maxlength="80"
+        required
+    >
+    <small class="error" id="nameError"></small>
+
+
+    <label for="email">Email</label>
+    <input
+        type="email"
+        id="email"
+        name="email"
+        maxlength="254"
+        required
+    >
+    <small class="error" id="emailError"></small>
+
+
+    <label for="subject">Subject</label>
+    <input
+        type="text"
+        id="subject"
+        name="subject"
+        maxlength="120"
+        required
+    >
+    <small class="error" id="subjectError"></small>
+
+
+    <label for="message">Message</label>
+    <textarea
+        id="message"
+        name="message"
+        minlength="10"
+        maxlength="3000"
+        required
+    ></textarea>
+    <small class="error" id="messageError"></small>
+
+    <div class="cf-turnstile"
+     data-sitekey="0x4AAAAAAGNCePbrgqeer3V_">
+</div>
+
+
+    <button type="submit" id="sendMessage">
+        Send Message
+    </button>
+
+    <p id="formStatus" aria-live="polite"></p>
+
+</form>
+
+    </div>
+
+</section>
+
+<!-- Chatbot -->
+
+<div id="chatbot">
+
+    <div class="chat-header">
+
+        <div>
+            <strong>Portfolio Assistant</strong>
+            <small>Ask me about my work</small>
+        </div>
+
+        <button id="minimizeChat">&minus;</button>
+
+    </div>
+
+
+    <div id="chatMessages">
+
+        <div class="bot-message">
+            Hi! Welcome to my portfolio.
+            What would you like to know?
+        </div>
+
+    </div>
+
+
+    <form id="chatForm">
+
+        <input
+            type="text"
+            id="chatInput"
+            placeholder="Type a message..."
+            autocomplete="off"
+        >
+
+        <button type="submit">Send</button>
+
+    </form>
+
+</div>
+
+
+<!-- Floating Chat Button -->
+
+<button id="openChat">
+    <span>&#128172;</span>
+</button>
+<script type="module" src="ui.js"></script>
+<script type="module" src="contact.js"></script>
+<script type="module" src="chatbot.js"></script>
     <script type="module"
         src="index.js">
     </script>
