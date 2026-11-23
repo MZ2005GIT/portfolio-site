@@ -3,6 +3,7 @@ import { OrbitControls } from "jsm/controls/OrbitControls.js";
 import { GLTFLoader } from 'jsm/loaders/GLTFLoader.js';
 import { RoundedBoxGeometry } from "jsm/geometries/RoundedBoxGeometry.js";
 import { Timer } from 'jsm/misc/Timer.js';
+import { openProjects } from "./ui.js";
 
 // 1. MAIN SCENE AND CAMERA
 const scene = new THREE.Scene();
@@ -564,8 +565,8 @@ function createRoom(posX, posY, posZ, width, depth, wallColor, floorColor, lampC
 
     // TV - LEFT WALL (-X)
     const tv = createTV(
-        -width / 2 + 1.5,
-        0.1,
+        -width / 2 + 0.5,
+        height/4,
         0,
         width * 0.3,
         1.5
@@ -726,7 +727,7 @@ new GLTFLoader().load(
     mixer = new THREE.AnimationMixer(model);
     console.log(gltf.animations.map(a => a.name)); // see what's available
 
-    const clip = gltf.animations[1];
+    const clip = gltf.animations[2];
     mixer.clipAction(clip).play();
   },
   (xhr) => console.log((xhr.loaded / xhr.total * 100).toFixed(0) + '% loaded'),
@@ -1231,6 +1232,30 @@ document.addEventListener('mousemove', (event) => {
 document.addEventListener('mouseup', () => {
     isMouseDown = false;
 });
+
+
+const mouse = new THREE.Vector2();
+
+const raycaster = new THREE.Raycaster();
+
+renderer.domElement.addEventListener("click", function(event) {
+    const rect = renderer.domElement.getBoundingClientRect();
+
+    let mouseX = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    let mouseY = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+    mouse.x = mouseX;
+    mouse.y = mouseY;
+
+    raycaster.setFromCamera(mouse, camera);
+
+    const intersects = raycaster.intersectObject(model);
+
+    if (intersects.length > 0) {
+        openProjects();
+    }
+
+})
 
 let previousTime;
 
