@@ -8,8 +8,6 @@ const chatForm = document.getElementById("chatForm");
 const chatInput = document.getElementById("chatInput");
 const chatMessages = document.getElementById("chatMessages");
 
-// Minimize chatbot
-
 minimizeChat.addEventListener("click", () => {
 
     chatbot.classList.add("minimized");
@@ -17,9 +15,6 @@ minimizeChat.addEventListener("click", () => {
     openChat.classList.remove("hidden");
 
 });
-
-
-// Reopen chatbot
 
 openChat.addEventListener("click", () => {
 
@@ -37,17 +32,14 @@ chatForm.addEventListener("submit", async (event) => {
 
     if (!userQuestion) return;
 
-    // Display the visitor's message
     const userMessage = document.createElement("div");
     userMessage.classList.add("user-message");
     userMessage.textContent = userQuestion;
 
     chatMessages.appendChild(userMessage);
 
-    // Clear input
     chatInput.value = "";
 
-    // Display loading message
     const loadingMessage = document.createElement("div");
     loadingMessage.classList.add("bot-message");
     loadingMessage.textContent = "Thinking...";
@@ -56,7 +48,6 @@ chatForm.addEventListener("submit", async (event) => {
 
     try {
 
-        // Send question to Python backend
         const response = await fetch("http://127.0.0.1:8000/chat", {
             method: "POST",
             headers: {
@@ -73,7 +64,6 @@ chatForm.addEventListener("submit", async (event) => {
 
         const data = await response.json();
 
-        // Display chatbot answer
         loadingMessage.textContent = data.answer;
 
     } catch (error) {
