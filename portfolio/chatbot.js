@@ -48,7 +48,7 @@ chatForm.addEventListener("submit", async (event) => {
 
     try {
 
-        const response = await fetch("http://127.0.0.1:8000/chat", {
+        const response = await fetch("https://main-chatbot-mashals-workspace.light-cloud.io/chat", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
