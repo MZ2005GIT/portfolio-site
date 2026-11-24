@@ -229,8 +229,6 @@ function createTV(posX, posY, posZ, width, height) {
     screen.material.color.set(0xffffff);
     screen.material.needsUpdate = true;
 
-    tv.userData.videoTexture = videoTexture;
-
     return tv;
 }
 
@@ -496,7 +494,6 @@ async function createRoom(posX, posY, posZ, width, depth, wallColor, floorColor,
     const dresserDrawers = THREE.MathUtils.randInt(2, 5);
 
     const sofaSize = 1.2;
-    const sofaWidth = sofaSeats * sofaSize;
 
     const doorWidth = 2;
     const doorHeight = 3.5;
@@ -649,6 +646,7 @@ async function createRoom(posX, posY, posZ, width, depth, wallColor, floorColor,
     const whiteboard = await initializeWhiteboard(0, height / 2 + 0.5, -depth / 2 + 0.5, 5, 2.5);
 
     room.add(whiteboard);
+    room.userData.whiteboard = whiteboard;
 
     room.position.set(posX, posY, posZ);
 
@@ -674,8 +672,6 @@ function changeVideo(videoPath){
     screen.material.map = videoTexture;
     screen.material.color.set(0xffffff);
     screen.material.needsUpdate = true;
-
-    tv.userData.videoTexture = videoTexture;
 }
 
 const trees = [];
@@ -811,7 +807,6 @@ renderer.setAnimationLoop((timestamp) => {
 
 });
 
-// 3. MAIN SCENE LIGHTING
 scene.add(new THREE.AmbientLight(0xffffff, 1.5));
 
 const mainLight = new THREE.DirectionalLight(0xffffff, 2);
@@ -1082,7 +1077,6 @@ scene.add(makeFenceZAxis(-14, 2, -48, 0.2, 4, 27));
 // scene.add(portalPlane);
 }
 
-// Convert canvas to texture
 async function makePaper(heading, text) {
 
     const paper = document.createElement('div');
@@ -1324,14 +1318,22 @@ function createWhiteboard(posX, posY, posZ, width, height, texture) {
     return whiteboard;
 }
 
-async function updateWhiteboard(whiteboard, heading, text) {
+async function updateWhiteboard(heading, text) {
+
+    console.log("Updating whiteboard:", heading, text);
 
     const texture = await makeWhiteboardTexture(heading, text);
 
-    const board = whiteboard.userData.board;
+    console.log("Texture generated:", texture);
+
+    const board = room.userData.whiteboard.userData.board;
+
+    console.log("Board found:", board);
 
     board.material[4].map = texture;
     board.material[4].needsUpdate = true;
+
+    console.log("Whiteboard updated!");
 }
 
 async function initializeWhiteboard(posX, posY, posZ, width, height) {
@@ -1469,22 +1471,40 @@ renderer.domElement.addEventListener("click", function(event) {
 
 let currentProject = null;
 
+const gameInfo = {
+    seeds: [
+        "The Seeds",
+        "A 3D maze game featuring enemy AI, hiding mechanics, shooting mechanics,\nfarming mechanics and maze exploration.\nGithub link: https://github.com/MZ200005GIT/THE-SEEDS"
+    ],
+    river: [
+        "River Survival",
+        "A 3D river-survival game in which the player navigates obstacles and fights enemies.\nGithub link: https://github.com/MZ2005GIT/river-survival"
+    ],
+    echoes: [
+        "Echoes of the Fallen",
+        "A 2D dungeon crawler featuring enemies, a fire snake, chests, and key-door mechanics.\nGithub link: https://github.com/MZ2005GIT/dungeoncrawler"
+    ],
+    masketeer: [
+        "Masketeer",
+        "A 2D dungeon crawler set across mismatched parallel worlds.\nGithub link: https://github.com/MZ2005GIT/game-jam-cega"
+    ],
+    jumanji: [
+        "Jumanji: The Board Game",
+        "The classic board game scene into an immersive 3D VR environment.\nGithub link: https://github.com/MZ200005GIT/darvrafinal"
+    ]
+};
+
 window.addEventListener("project-selected", (event) => {
 
     currentProject = event.detail;
 
     console.log("Selected project:", currentProject);
 
-    if (event.detail === "seeds") {
-        changeVideo("seeds.mp4");
-    } else if (event.detail === "echoes") {
-        changeVideo("echoes.mp4");
-    } else if (event.detail === "jumanji") {
-        changeVideo("jumanji.mp4");
-    } else if (event.detail === "masketeer") {
-        changeVideo("masketeer.mp4");
-    } else if (event.detail === "river") {
-        changeVideo("river.mp4");
+    const game = gameInfo[event.detail];
+
+    if (game) {
+        changeVideo(event.detail + ".mp4");
+        updateWhiteboard(game[0], game[1]);
     }
 
 });
@@ -1519,7 +1539,6 @@ function animate(currentTime) {
 }
 animate(performance.now());
 
-// 12. RESIZE THE MAIN CAMERA AND RENDERER
 window.addEventListener('resize', () => {
 camera.aspect = window.innerWidth / window.innerHeight;
 camera.updateProjectionMatrix();
