@@ -165,6 +165,24 @@ function createSofa(posX, posY, posZ, seats, seatSize) {
     return sofa;
 }
 
+let videoTexture = createVideoTexture("solarsystem.mp4");
+
+function createVideoTexture(videoPath) {
+
+    const video = document.createElement("video");
+
+    video.src = videoPath;
+    video.loop = true;
+    video.muted = true;
+    video.playsInline = true;
+
+    const texture = new THREE.VideoTexture(video);
+
+    video.play();
+
+    return texture;
+}
+
 function createTV(posX, posY, posZ, width, height) {
 
     const tv = new THREE.Group();
@@ -204,6 +222,14 @@ function createTV(posX, posY, posZ, width, height) {
     tv.add(rightLeg);
 
     tv.position.set(posX, posY, posZ);
+
+    tv.userData.screen = screen;
+
+    screen.material.map = videoTexture;
+    screen.material.color.set(0xffffff);
+    screen.material.needsUpdate = true;
+
+    tv.userData.videoTexture = videoTexture;
 
     return tv;
 }
@@ -458,7 +484,7 @@ function createLamp(posX, posY, posZ, height, lightColor) {
     return lamp;
 }
 
-function createRoom(posX, posY, posZ, width, depth, wallColor, floorColor, lampColor) {
+async function createRoom(posX, posY, posZ, width, depth, wallColor, floorColor, lampColor) {
 
     const room = new THREE.Group();
 
@@ -568,12 +594,13 @@ function createRoom(posX, posY, posZ, width, depth, wallColor, floorColor, lampC
         -width / 2 + 0.5,
         height/4,
         0,
-        width * 0.3,
-        1.5
+        width * 0.4,
+        width * 0.3
     );
 
     room.add(tv);
     tv.rotateY(Math.PI / 2);
+    room.userData.tv = tv;
 
     // COFFEE TABLE
     const table = createCoffeeTable(
@@ -619,6 +646,10 @@ function createRoom(posX, posY, posZ, width, depth, wallColor, floorColor, lampC
 
     room.add(lamp);
 
+    const whiteboard = await initializeWhiteboard(0, height / 2 + 0.5, -depth / 2 + 0.5, 5, 2.5);
+
+    room.add(whiteboard);
+
     room.position.set(posX, posY, posZ);
 
     scene.add(room);
@@ -626,13 +657,28 @@ function createRoom(posX, posY, posZ, width, depth, wallColor, floorColor, lampC
     return room;
 }
 
-createRoom(
+const room = await createRoom(
     0, 0, -55,
     10, 10,
     0xD8D2C8,
     0xA68A64,
     0xFFE2A0
 );
+
+function changeVideo(videoPath){
+    videoTexture = createVideoTexture(videoPath);
+
+    const tv = room.userData.tv;
+    const screen = tv.userData.screen;
+
+    screen.material.map = videoTexture;
+    screen.material.color.set(0xffffff);
+    screen.material.needsUpdate = true;
+
+    tv.userData.videoTexture = videoTexture;
+}
+
+changeVideo("seeds.mp4");
 
 const trees = [];
 
@@ -705,7 +751,6 @@ createTrees(20);
 let mixer;
 const timer = new Timer();
 let model;
-// optional: ignores time spent while the tab is hidden
 
 new GLTFLoader().load(
   'alien.glb',
@@ -716,7 +761,7 @@ new GLTFLoader().load(
     const size = new THREE.Box3().setFromObject(model).getSize(new THREE.Vector3());
     console.log(size, model.position);
     model.scale.set(0.8, 0.8, 0.8);
-    model.position.z = -52;
+    model.position.z = -51.4;
     model.position.x = -3.7;
     model.position.y = 0.1;
 
@@ -727,7 +772,7 @@ new GLTFLoader().load(
     mixer = new THREE.AnimationMixer(model);
     console.log(gltf.animations.map(a => a.name)); // see what's available
 
-    const clip = gltf.animations[2];
+    const clip = gltf.animations[0];
     mixer.clipAction(clip).play();
   },
   (xhr) => console.log((xhr.loaded / xhr.total * 100).toFixed(0) + '% loaded'),
@@ -1156,6 +1201,133 @@ async function initializePosters() {
 
 initializePosters();
 
+async function makeWhiteboardTexture(heading, text) {
+
+    const paper = document.createElement('div');
+
+    paper.className = 'whiteboard';
+
+    const title = document.createElement('h1');
+    title.textContent = heading;
+
+    const details = document.createElement('p');
+    details.textContent = text;
+
+    paper.appendChild(title);
+    paper.appendChild(details);
+
+    document.body.appendChild(paper);
+
+    const canvas = await html2canvas(paper);
+
+    const texture = new THREE.CanvasTexture(canvas);
+
+    paper.remove();
+
+    return texture;
+}
+
+function createWhiteboard(posX, posY, posZ, width, height, texture) {
+
+    const whiteboard = new THREE.Group();
+
+    const thickness = 0.2;
+
+    // Main whiteboard surface
+    const board = createBox(
+        0, 0, 0,
+        width, height, thickness,
+        0xFFFFFF
+    );
+
+    // Apply the text texture to the front face
+    board.material[4] = new THREE.MeshStandardMaterial({
+        map: texture
+    });
+
+    whiteboard.add(board);
+
+    // Frame
+    const frameWidth = 0.15;
+    const frameThickness = 0.4;
+    const frameColor = 0x777777;
+
+    const topFrame = createBox(
+        0, height / 2, 0,
+        width + frameWidth,
+     frameWidth,
+        frameThickness,
+        frameColor
+    );
+
+    const bottomFrame = createBox(
+        0, -height / 2, 0,
+        width + frameWidth,
+     frameWidth,
+        frameThickness,
+        frameColor
+    );
+
+    const leftFrame = createBox(
+        -width / 2, 0, 0,
+     frameWidth,
+        height,
+        frameThickness,
+        frameColor
+    );
+
+    const rightFrame = createBox(
+        width / 2, 0, 0,
+     frameWidth,
+        height,
+        frameThickness,
+        frameColor
+    );
+
+    whiteboard.add(topFrame);
+    whiteboard.add(bottomFrame);
+    whiteboard.add(leftFrame);
+    whiteboard.add(rightFrame);
+
+    // Position
+    whiteboard.position.set(posX, posY, posZ);
+
+    // Store references for updating later
+    whiteboard.userData.board = board;
+    whiteboard.userData.width = width;
+    whiteboard.userData.height = height;
+
+    scene.add(whiteboard);
+
+    return whiteboard;
+}
+
+async function updateWhiteboard(whiteboard, heading, text) {
+
+    const texture = await makeWhiteboardTexture(heading, text);
+
+    const board = whiteboard.userData.board;
+
+    board.material[4].map = texture;
+    board.material[4].needsUpdate = true;
+}
+
+async function initializeWhiteboard(posX, posY, posZ, width, height) {
+
+    const texture = await makeWhiteboardTexture(
+        'Hello',
+            'Click on the plushie to select a project'
+    );
+
+    const whiteboard = createWhiteboard(
+        posX, posY, posZ,
+        width, height,
+        texture
+    );
+
+    return whiteboard;
+}
+
 const keys = {};
 
 window.addEventListener(
@@ -1256,6 +1428,16 @@ renderer.domElement.addEventListener("click", function(event) {
     }
 
 })
+
+let currentProject = null;
+
+window.addEventListener("project-selected", (event) => {
+
+    currentProject = event.detail;
+
+    console.log("Selected project:", currentProject);
+
+});
 
 let previousTime;
 

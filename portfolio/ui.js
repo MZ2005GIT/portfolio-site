@@ -53,3 +53,23 @@ export function openProjects() {
 closeProjects.addEventListener("click", () => {
     projectsOverlay.classList.add("hidden");
 });
+
+const projectButtons = document.querySelectorAll(".project-btn");
+
+projectButtons.forEach(button => {
+
+    button.addEventListener("click", () => {
+
+        const project = button.dataset.project;
+
+        window.dispatchEvent(
+            new CustomEvent("project-selected", {
+                detail: project
+            })
+        );
+
+        projectsOverlay.classList.add("hidden");
+
+    });
+
+});
