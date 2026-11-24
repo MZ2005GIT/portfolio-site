@@ -747,45 +747,69 @@ function createTrees(totalTrees) {
 createTrees(20);
 
 let mixer;
-const timer = new Timer();
 let model;
+let animations = [];
+
+let idleAction;
+let jumpAction;
+
+let canJump = true;
+let cooldown = 1; // seconds
+const timer = new Timer();
 
 new GLTFLoader().load(
   'alien.glb',
   (gltf) => {
     model = gltf.scene;
     scene.add(model);
-    
-    const size = new THREE.Box3().setFromObject(model).getSize(new THREE.Vector3());
-    console.log(size, model.position);
+
     model.scale.set(0.8, 0.8, 0.8);
-    model.position.z = -51.4;
+    model.position.z = -51.6;
     model.position.x = -3.7;
     model.position.y = 0.1;
 
-    //model.position.z = 40;
-    //model.rotation.y = -Math.PI/2;
-
-    // Animations come as an array of AnimationClips
     mixer = new THREE.AnimationMixer(model);
-    console.log(gltf.animations.map(a => a.name)); // see what's available
 
-    const clip = gltf.animations[0];
-    mixer.clipAction(clip).play();
+    animations = gltf.animations;
+
+    idleAction = mixer.clipAction(animations[0]);
+    jumpAction = mixer.clipAction(animations[2]);
+
+    idleAction.play();
+
+    // When the jump animation finishes
+    mixer.addEventListener('finished', function(event) {
+
+      if (event.action === jumpAction) {
+
+        idleAction.reset();
+        idleAction.play();
+
+        // Start cooldown
+        setTimeout(() => {
+          canJump = true;
+        }, cooldown * 1000);
+
+      }
+
+    });
+
   },
   (xhr) => console.log((xhr.loaded / xhr.total * 100).toFixed(0) + '% loaded'),
   (err) => console.error('Load failed', err)
 );
 
 renderer.setAnimationLoop((timestamp) => {
-  timer.update(timestamp);
-  if (mixer) mixer.update(timer.getDelta());
-  if (model) {
 
-  } 
-  renderer.render(scene, camera);
+    timer.update(timestamp);
+
+    if (mixer) {
+        mixer.update(timer.getDelta());
+    }
+
+    renderer.render(scene, camera);
+
 });
-
 
 // 3. MAIN SCENE LIGHTING
 scene.add(new THREE.AmbientLight(0xffffff, 1.5));
@@ -1314,7 +1338,7 @@ async function initializeWhiteboard(posX, posY, posZ, width, height) {
 
     const texture = await makeWhiteboardTexture(
         'Hello',
-            'Click on the plushie to select a project'
+            'Click on the tv to select a project\nClick the model to tickle it'
     );
 
     const whiteboard = createWhiteboard(
@@ -1419,10 +1443,26 @@ renderer.domElement.addEventListener("click", function(event) {
 
     raycaster.setFromCamera(mouse, camera);
 
-    const intersects = raycaster.intersectObject(model);
+    const tvIntersects = raycaster.intersectObject(room.userData.tv);
 
-    if (intersects.length > 0) {
+    if (tvIntersects.length > 0) {
         openProjects();
+    }
+
+    const modelIntersects = raycaster.intersectObject(model, true);
+
+    if (modelIntersects.length > 0 && canJump) {
+
+        canJump = false;
+
+        idleAction.stop();
+
+        jumpAction.reset();
+        jumpAction.setLoop(THREE.LoopOnce);
+        jumpAction.clampWhenFinished = true;
+
+        jumpAction.play();
+
     }
 
 })
@@ -1435,8 +1475,16 @@ window.addEventListener("project-selected", (event) => {
 
     console.log("Selected project:", currentProject);
 
-    if(event.detail === "seeds") {
+    if (event.detail === "seeds") {
         changeVideo("seeds.mp4");
+    } else if (event.detail === "echoes") {
+        changeVideo("echoes.mp4");
+    } else if (event.detail === "jumanji") {
+        changeVideo("jumanji.mp4");
+    } else if (event.detail === "masketeer") {
+        changeVideo("masketeer.mp4");
+    } else if (event.detail === "river") {
+        changeVideo("river.mp4");
     }
 
 });
