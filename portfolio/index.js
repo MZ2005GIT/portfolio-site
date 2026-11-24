@@ -22,9 +22,36 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 document.body.appendChild(renderer.domElement);
 
-// const controls  = new OrbitControls(camera, renderer.domElement);
-// controls.enableDamping = true;
-// controls.dampingFactor = 0.003;
+let currentProject = null;
+let game = null;
+
+const gameInfo = {
+    seeds: [
+        "The Seeds",
+        "A 3D maze game featuring enemy AI, hiding mechanics, shooting mechanics, farming mechanics and maze exploration.",
+        "https://github.com/MZ200005GIT/THE-SEEDS"
+    ],
+    river: [
+        "River Survival",
+        "A 3D river-survival game in which the player navigates obstacles and fights enemies.",
+        "https://github.com/MZ2005GIT/river-survival"
+    ],
+    echoes: [
+        "Echoes of the Fallen",
+        "A 2D dungeon crawler featuring enemies, a fire snake, chests, and key-door mechanics.",
+        "https://github.com/MZ2005GIT/dungeoncrawler"
+    ],
+    masketeer: [
+        "Masketeer",
+        "A 2D dungeon crawler set across mismatched parallel worlds.",
+        "https://github.com/MZ2005GIT/game-jam-cega"
+    ],
+    jumanji: [
+        "Jumanji: The Board Game",
+        "The classic board game scene into an immersive 3D VR environment.",
+        "https://github.com/MZ200005GIT/darvrafinal"
+    ]
+};
 
 function createBox(x, y, z, width, height, depth, color) {
 
@@ -795,18 +822,6 @@ new GLTFLoader().load(
   (err) => console.error('Load failed', err)
 );
 
-renderer.setAnimationLoop((timestamp) => {
-
-    timer.update(timestamp);
-
-    if (mixer) {
-        mixer.update(timer.getDelta());
-    }
-
-    renderer.render(scene, camera);
-
-});
-
 scene.add(new THREE.AmbientLight(0xffffff, 1.5));
 
 const mainLight = new THREE.DirectionalLight(0xffffff, 2);
@@ -954,128 +969,6 @@ function makeFenceZAxis(startX, y, startZ, radius, height, totalBars) {
 
 scene.add(makeFenceZAxis(14, 2, -48, 0.2, 4, 27));
 scene.add(makeFenceZAxis(-14, 2, -48, 0.2, 4, 27));
-
-
-{
-// 5. PORTAL FRAME
-// const frameMaterial = new THREE.MeshStandardMaterial({
-// color: 0x00ccff,
-// emissive: 0x0077ff,
-// emissiveIntensity: 2,
-// metalness: 0.6,
-// roughness: 0.25
-// });
-
-// function createFramePart(width, height, x, y, z) {
-// const part = new THREE.Mesh(
-// new THREE.BoxGeometry(width, height, 0.25),
-// frameMaterial
-// );
-// part.position.set(x, y, z);
-// scene.add(part);
-// return part;
-// }
-
-// createFramePart(0.15, 3.4, -1.4, 1.8, 0);
-// createFramePart(0.15, 3.4, 1.4, 1.8, 0);
-// createFramePart(2.9, 0.15, 0, 3.5, 0);
-// createFramePart(2.9, 0.15, 0, 0.1, 0);
-
-// 6. SECOND SCENE: THE WORLD INSIDE THE PORTAL
-// const portalScene = new THREE.Scene();
-
-// portalScene.background = scene.background.clone();
-
-// const enemy = createEnemy();
-
-// portalScene.add(enemy);
-
-// enemy.position.y = 1;
-
-// enemy.position.z = 6;
-
-// portalScene.add(createPlatform(0, 0, 6, 3, 0.5, 3));
-
-// portalScene.add(createTower(3, 0, 5, 2));
-
-// portalScene.add(createTower(-3, 0, 5, 2));
-
-// const portalCamera = new THREE.PerspectiveCamera(
-//     60,
-//     2.65 / 3.1,
-//     0.1,
-//     100
-// );
-
-// portalCamera.position.copy(camera.position);
-// portalCamera.quaternion.copy(camera.quaternion);
-// portalCamera.rotateX = 1.5;
-
-// portalScene.add(new THREE.AmbientLight(0xffffff, 1.5));
-
-// // 7. OBJECTS INSIDE THE PORTAL
-
-// // 8. OFF-SCREEN TEXTURE FOR THE PORTAL VIEW
-// // Its aspect ratio matches the portal plane.
-// const portalTexture = new THREE.WebGLRenderTarget(800, 936, {
-// minFilter: THREE.LinearFilter,
-// magFilter: THREE.LinearFilter,
-// format: THREE.RGBAFormat,
-// depthBuffer: true
-// });
-
-// // 9. SHADER: SHOW THE TEXTURE, ADD MOVING COLOUR AND FADE EDGES
-// const portalMaterial = new THREE.ShaderMaterial({
-// uniforms: {
-// tPortal: { value: portalTexture.texture },
-// uTime: { value: 0 }
-// },
-
-// vertexShader: `
-// varying vec2 vUv;
-
-// void main() {
-// vUv = uv;
-// gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-// }
-// `,
-
-// fragmentShader: `
-// uniform sampler2D tPortal;
-// varying vec2 vUv;
-
-// void main() {
-// vec4 portalColor = texture2D(tPortal, vUv);
-
-// vec3 glow = vec3(0.05, 0.2, 0.8);
-// vec3 finalColor = portalColor.rgb
-// + glow * 0.05;
-
-// float edge = min(
-// min(vUv.x, 1.0 - vUv.x),
-// min(vUv.y, 1.0 - vUv.y)
-// );
-// float alpha = smoothstep(0.0, 0.1, edge);
-
-// gl_FragColor = vec4(finalColor, alpha);
-
-// #include <tonemapping_fragment>
-// #include <colorspace_fragment>
-// }
-// `,
-// transparent: true,
-// depthWrite: false,
-// side: THREE.DoubleSide
-// });
-
-// // 10. PORTAL PLANE
-// const portalPlane = new THREE.Mesh(
-// new THREE.PlaneGeometry(2.65, 3.1),
-// portalMaterial
-// );
-// portalPlane.position.set(0, 1.8, 0.14);
-// scene.add(portalPlane);
-}
 
 async function makePaper(heading, text) {
 
@@ -1467,32 +1360,13 @@ renderer.domElement.addEventListener("click", function(event) {
 
     }
 
+    const boardIntersects = raycaster.intersectObject(room.userData.whiteboard);
+
+    if (boardIntersects.length > 0 && game) {
+        window.open(game[2], "_blank");
+    }
+
 })
-
-let currentProject = null;
-
-const gameInfo = {
-    seeds: [
-        "The Seeds",
-        "A 3D maze game featuring enemy AI, hiding mechanics, shooting mechanics,\nfarming mechanics and maze exploration.\nGithub link: https://github.com/MZ200005GIT/THE-SEEDS"
-    ],
-    river: [
-        "River Survival",
-        "A 3D river-survival game in which the player navigates obstacles and fights enemies.\nGithub link: https://github.com/MZ2005GIT/river-survival"
-    ],
-    echoes: [
-        "Echoes of the Fallen",
-        "A 2D dungeon crawler featuring enemies, a fire snake, chests, and key-door mechanics.\nGithub link: https://github.com/MZ2005GIT/dungeoncrawler"
-    ],
-    masketeer: [
-        "Masketeer",
-        "A 2D dungeon crawler set across mismatched parallel worlds.\nGithub link: https://github.com/MZ2005GIT/game-jam-cega"
-    ],
-    jumanji: [
-        "Jumanji: The Board Game",
-        "The classic board game scene into an immersive 3D VR environment.\nGithub link: https://github.com/MZ200005GIT/darvrafinal"
-    ]
-};
 
 window.addEventListener("project-selected", (event) => {
 
@@ -1500,44 +1374,37 @@ window.addEventListener("project-selected", (event) => {
 
     console.log("Selected project:", currentProject);
 
-    const game = gameInfo[event.detail];
+    game = gameInfo[event.detail];
 
     if (game) {
         changeVideo(event.detail + ".mp4");
-        updateWhiteboard(game[0], game[1]);
+        updateWhiteboard(game[0], game[1] + "Github Link: " + game[2]);
     }
 
 });
 
-let previousTime;
+renderer.setAnimationLoop((timestamp) => {
 
-function animate(currentTime) {
-    requestAnimationFrame(animate);
+    // Update the timer
+    timer.update(timestamp);
 
-    if (previousTime === undefined)
-    {
-        previousTime = currentTime;
+    // Get the time between frames
+    const deltaTime = timer.getDelta();
+
+    // Update character animations
+    if (mixer) {
+        mixer.update(deltaTime);
     }
 
-    const deltaTime = (currentTime - previousTime) / 1000;
-
-    previousTime = currentTime;
-
-    // portalMaterial.uniforms.uTime.value = elapsed;
-
-    //controls.update();
+    // Update camera movement
     moveCamera(deltaTime);
 
-    // Render the portal scene to its texture first.
-    // renderer.setRenderTarget(portalTexture);
-    renderer.clear();
-    // renderer.render(portalScene, portalCamera);
-
-    // Then render the main scene to the browser.
+    // Render the main scene
     renderer.setRenderTarget(null);
+    renderer.clear();
     renderer.render(scene, camera);
-}
-animate(performance.now());
+
+});
 
 window.addEventListener('resize', () => {
 camera.aspect = window.innerWidth / window.innerHeight;
