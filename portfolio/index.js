@@ -678,8 +678,6 @@ function changeVideo(videoPath){
     tv.userData.videoTexture = videoTexture;
 }
 
-changeVideo("seeds.mp4");
-
 const trees = [];
 
 function createTree(posX, posZ, rTop, rBottom, height, spheres) {
@@ -1436,6 +1434,10 @@ window.addEventListener("project-selected", (event) => {
     currentProject = event.detail;
 
     console.log("Selected project:", currentProject);
+
+    if(event.detail === "seeds") {
+        changeVideo("seeds.mp4");
+    }
 
 });
 
