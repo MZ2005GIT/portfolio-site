@@ -207,6 +207,9 @@ function createVideoTexture(videoPath) {
 
     video.play();
 
+    // Store video reference inside texture
+    texture.userData.video = video;
+
     return texture;
 }
 
@@ -690,17 +693,35 @@ const room = await createRoom(
     0xFFE2A0
 );
 
-function changeVideo(videoPath){
-    videoTexture = createVideoTexture(videoPath);
+function changeVideo(videoPath) {
 
+    // Get existing TV and screen
     const tv = room.userData.tv;
     const screen = tv.userData.screen;
 
+    // Get old video texture
+    const oldTexture = screen.material.map;
+
+    if (oldTexture) {
+
+        // Get the old HTML video element
+        const oldVideo = oldTexture.userData.video;
+
+        // Stop old video playback
+        oldVideo.pause();
+
+        // Release old texture from GPU memory
+        oldTexture.dispose();
+    }
+
+    // Create new video texture
+    videoTexture = createVideoTexture(videoPath);
+
+    // Apply new texture to screen
     screen.material.map = videoTexture;
     screen.material.color.set(0xffffff);
     screen.material.needsUpdate = true;
 }
-
 const trees = [];
 
 function createTree(posX, posZ, rTop, rBottom, height, spheres) {
