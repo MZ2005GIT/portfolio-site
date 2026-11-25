@@ -643,15 +643,16 @@ async function createRoom(posX, posY, posZ, width, depth, wallColor, floorColor,
     const dresserHeight = THREE.MathUtils.randFloat(dresserDrawers * 0.3, dresserDrawers * 0.5);
 
     const dresser = createDresser(
-        0,
+        4.3,
         0.1,
-        -depth / 2 + 0.8,
+        -depth / 2 + 1.1,
         dresserWidth,
         dresserHeight,
         dresserDrawers
     );
 
     room.add(dresser);
+    dresser.rotation.y = -Math.PI/2;
 
     // DOOR
     const door = createDoor(
@@ -768,10 +769,10 @@ function createTrees(totalTrees) {
         // const x = THREE.MathUtils.randFloat(-20, 20);
         // const z = THREE.MathUtils.randFloat(-40, 40);
         if (i % 2 === 0) {
-            x = 5.5;
+            x = 5.7;
             z -= THREE.MathUtils.randFloat(8, 10);;
         } else {
-            x = -5.3;
+            x = -5.7;
         }
 
         x += errX;
@@ -795,7 +796,7 @@ let model;
 let animations = [];
 
 let idleAction;
-let jumpAction;
+let walkAction;
 
 let canJump = true;
 let cooldown = 1; // seconds
@@ -817,14 +818,15 @@ new GLTFLoader().load(
     animations = gltf.animations;
 
     idleAction = mixer.clipAction(animations[0]);
-    jumpAction = mixer.clipAction(animations[2]);
+    walkAction = mixer.clipAction(animations[2]);
+    jumpAction = mixer.clipAction(animations[1]);
 
     idleAction.play();
 
     // When the jump animation finishes
     mixer.addEventListener('finished', function(event) {
 
-      if (event.action === jumpAction) {
+      if (event.action === walkAction) {
 
         idleAction.reset();
         idleAction.play();
@@ -850,7 +852,7 @@ mainLight.position.set(0, 20, 0);
 scene.add(mainLight);
 
 const groundGeometry = new THREE.BoxGeometry(
-    30, 0.5, 100
+    30, 0.5, 120
 );
 
 const groundMaterial = new THREE.MeshStandardMaterial({
@@ -877,14 +879,14 @@ function createSteps(totalSteps){
 
     for (let i = 0; i < totalSteps; i++) {
         let x = 1;
-        let err = THREE.MathUtils.randFloat(-0.5, 0.5);
+        let err = THREE.MathUtils.randFloat(-0.4, 0.4);
 
         let width = 2.4, depth = 2.4;
 
         if (i % 2 == 0) {
-            x = 1.4;
+            x = 1.5;
         } else {
-            x = -1.4;
+            x = -1.5;
         }
 
         x += err;
@@ -1308,9 +1310,14 @@ function moveCamera(deltaTime)
         camera.position.x += speed * deltaTime;
     }
 
-    camera.position.x = THREE.MathUtils.clamp(camera.position.x, -14, 14);
+    camera.position.z = THREE.MathUtils.clamp(camera.position.z, -59, 45);
 
-    camera.position.z = THREE.MathUtils.clamp(camera.position.z, -65, 45);
+    if (camera.position.z >= -50) {
+        camera.position.x = THREE.MathUtils.clamp(camera.position.x, -0.6, 0.6);
+    } else {
+        camera.position.x = THREE.MathUtils.clamp(camera.position.x, -4, 4);
+    }
+
 }
 
 let isMouseDown = false;
@@ -1373,11 +1380,11 @@ renderer.domElement.addEventListener("click", function(event) {
 
         idleAction.stop();
 
-        jumpAction.reset();
-        jumpAction.setLoop(THREE.LoopOnce);
-        jumpAction.clampWhenFinished = true;
+        walkAction.reset();
+        walkAction.setLoop(THREE.LoopOnce);
+        walkAction.clampWhenFinished = true;
 
-        jumpAction.play();
+        walkAction.play();
 
     }
 
