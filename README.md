@@ -103,11 +103,11 @@ This project uses JavaScript ES modules and Three.js, so it should be run throug
 
 ### 1. Clone the repository
 
-git clone <repository-url>
+git clone [<repository-url>](https://github.com/MZ2005GIT/portfolio-site)
 
 ### 2. Navigate into the project folder
 
-cd <repository-folder>
+cd portfolio
 
 ### 3. Start a local server
 
