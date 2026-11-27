@@ -5,8 +5,6 @@ An interactive 3D portfolio website built using **Three.js, HTML, CSS, and JavaS
 
 **Live Website:** https://portfolio-site-2iyd.netlify.app/
 
----
-
 ## Overview
 
 This project is an interactive portfolio designed to present my projects, technical skills, and experience through a 3D environment.
@@ -124,8 +122,6 @@ Alternatively, use the Live Server extension in Visual Studio Code.
 Visit:
 
 http://localhost:5500
-
----
 
 ## Controls
 
