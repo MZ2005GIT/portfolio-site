@@ -75,6 +75,7 @@ The website also includes a chatbot for answering questions about the portfolio 
 | Cloudflare Turnstile | Spam and bot protection |
 | Gemini API | Chatbot responses |
 | Netlify | Website hosting |
+| lightcloud | Chatbot hosting |
 
 ## Project Structure
 
